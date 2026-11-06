@@ -15,7 +15,7 @@ Write one prompt (max 90 words, plain text, no quotes) that:
 - if a scene image is given: tells the model to keep that background exactly, briefly describes it, and asks to match the person's lighting and colour to it with clean edges around hair and shoulders,
 - if no scene image is given: tells the model to keep the original background unchanged,
 - asks for a realistic, sharp, photographic result.
-Output only the prompt.`;
+Always assume the face photo is valid; never hedge or add conditions. Output only the prompt.`;
 
 // Uses the Lovable AI Gateway to tailor the Decart prompt to the chosen face and scene.
 export const generateSwapPrompt = createServerFn({ method: "POST" })
