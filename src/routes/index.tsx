@@ -7,6 +7,7 @@ import livingRoom from "@/assets/bg-living-room.jpg";
 import office from "@/assets/bg-office.jpg";
 import backyard from "@/assets/bg-backyard.jpg";
 import beach from "@/assets/bg-beach.jpg";
+import swapcamLogo from "@/assets/swapcam-logo.png";
 
 const backgroundImages: Record<BackgroundId, string> = {
   "living-room": livingRoom,
@@ -95,7 +96,7 @@ function Index() {
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-5 py-10 md:py-14">
         <header className="mb-10" hidden={!!session}>
-          <p className="font-display text-sm uppercase tracking-[0.3em] text-primary">SwapCam</p>
+          <img src={swapcamLogo} alt="SwapCam" width={998} height={273} className="h-10 w-auto md:h-12" />
           <h1 className="mt-3 font-display text-4xl font-bold leading-tight md:text-6xl">
             Be someone else, <span className="text-gradient">somewhere else.</span>
           </h1>
