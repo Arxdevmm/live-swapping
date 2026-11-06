@@ -177,7 +177,7 @@ function Index() {
           </aside>
 
           <section className="space-y-4">
-            <div className="panel relative aspect-video overflow-hidden">
+            <div className="panel relative mx-auto aspect-[9/16] w-full max-w-md overflow-hidden">
               <video ref={remoteRef} autoPlay playsInline muted className="size-full object-cover" />
               {session && (
                 <button type="button" onClick={stop} className="btn-secondary absolute bottom-3 right-3">

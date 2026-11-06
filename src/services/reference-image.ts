@@ -1,4 +1,4 @@
-// Builds one reference image for Decart: the face photo on the left, the full scene on the right.
+// Builds one reference image for Decart: the face photo on the left, the full scene on the right (both portrait).
 // Decart accepts a single reference image per session, so both are combined side by side.
 const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -19,9 +19,9 @@ export async function buildReferenceImage(face: File, backgroundUrl: string): Pr
   const faceUrl = URL.createObjectURL(face);
   try {
     const [faceImg, bgImg] = await Promise.all([loadImage(faceUrl), loadImage(backgroundUrl)]);
-    const height = 1080;
-    const faceWidth = 810;
-    const bgWidth = 1920;
+    const height = 1920;
+    const faceWidth = 1080;
+    const bgWidth = 1080;
     const canvas = document.createElement("canvas");
     canvas.width = faceWidth + bgWidth;
     canvas.height = height;
