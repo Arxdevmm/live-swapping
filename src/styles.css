@@ -124,6 +124,11 @@
   .scene-tile[data-active="true"] { @apply border-primary; box-shadow: var(--shadow-glow); }
   .btn-primary { @apply rounded-lg px-5 py-3 font-display font-semibold text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-40; background: var(--gradient-primary); box-shadow: var(--shadow-glow); }
   .btn-secondary { @apply rounded-lg border border-border bg-secondary px-5 py-3 font-display font-semibold text-secondary-foreground transition hover:border-destructive; }
+  .toggle { @apply relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-muted transition; }
+  .toggle[aria-checked="true"] { background: var(--gradient-primary); }
+  .toggle-thumb { @apply inline-block size-5 translate-x-0.5 rounded-full bg-foreground transition; }
+  .toggle[aria-checked="true"] .toggle-thumb { @apply translate-x-5.5; }
+  [data-disabled="true"] .scene-tile { @apply opacity-50; }
   .status-pill { @apply rounded-full bg-background/80 px-3 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground; }
   .status-pill[data-live="true"] { @apply text-live; }
 }

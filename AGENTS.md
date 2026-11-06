@@ -30,3 +30,5 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Decart live sessions use short-lived client tokens minted by a server function (src/lib/decart.functions.ts); the permanent key never reaches the browser.
+- Background swap is done on-device (MediaPipe segmentation in src/services/background-compositor.ts) before frames reach Decart; Decart only gets the face as its single reference image.
+- Decart prompts are written per selection by the AI Gateway (src/lib/prompt-ai.functions.ts) with buildSwapPrompt as fallback.
