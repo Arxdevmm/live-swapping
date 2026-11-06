@@ -19,12 +19,14 @@ export const backgroundDescriptions: Record<BackgroundId, { label: string; scene
   },
 };
 
-// Auto-configured prompt sent to Decart together with the uploaded face photo.
+// Auto-configured prompt sent to Decart together with the combined face + scene reference image.
 export function buildSwapPrompt(background: BackgroundId): string {
   const { scene } = backgroundDescriptions[background];
   return (
-    "Replace the person's face with the face from the reference image, keeping their " +
-    "expressions, head movement and lighting natural. Replace the entire background with " +
-    `${scene}. The result must look like a realistic photo. Keep the person's body, clothing and pose unchanged.`
+    "The reference image has two parts: a face photo on the left and a full background scene on the right. " +
+    "Replace the person's face with the face from the left side of the reference image, matching identity, " +
+    "skin tone and features precisely while keeping their expressions and head movement. Replace the entire " +
+    `background, edge to edge, with the full scene from the right side of the reference image: ${scene}. ` +
+    "Keep sharp detail, natural lighting matched to the scene and clean edges around hair and shoulders. The result must look like a realistic photo. Keep the person's body, clothing and pose unchanged."
   );
 }

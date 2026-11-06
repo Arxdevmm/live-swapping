@@ -49,7 +49,7 @@ function Index() {
   // Push new face/background to a running session automatically.
   useEffect(() => {
     if (!session || !faceFile) return;
-    updateLiveSwap(session, faceFile, buildSwapPrompt(background)).catch((e: unknown) =>
+    updateLiveSwap(session, faceFile, backgroundImages[background], buildSwapPrompt(background)).catch((e: unknown) =>
       setError(e instanceof Error ? e.message : "Could not update the swap"),
     );
   }, [session, faceFile, background]);
@@ -66,6 +66,7 @@ function Index() {
     try {
       const s = await startLiveSwap({
         face: faceFile,
+        backgroundUrl: backgroundImages[background],
         prompt: buildSwapPrompt(background),
         onLocalStream: () => undefined,
         onRemoteStream: (stream) => {
