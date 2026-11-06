@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useSwapStore } from "@/stores/swap-store";
-import { backgroundDescriptions, buildSwapPrompt, type BackgroundId } from "@/lib/prompts";
+import { presetSceneDescriptions, type SceneOption } from "@/lib/prompts";
+import { getSwapPrompt } from "@/services/prompt-ai";
 import { startLiveSwap, updateLiveSwap, type LiveSwapSession } from "@/services/live-swap";
 import livingRoom from "@/assets/bg-living-room.jpg";
 import office from "@/assets/bg-office.jpg";
@@ -9,13 +10,18 @@ import backyard from "@/assets/bg-backyard.jpg";
 import beach from "@/assets/bg-beach.jpg";
 import swapcamLogo from "@/assets/swapcam-logo.png";
 
-const backgroundImages: Record<BackgroundId, string> = {
+const presetImages: Record<string, string> = {
   "living-room": livingRoom,
   office,
   backyard,
   beach,
 };
-const backgroundIds = Object.keys(backgroundImages) as BackgroundId[];
+const presetScenes: SceneOption[] = Object.entries(presetImages).map(([id, src]) => ({
+  id,
+  src,
+  label: presetSceneDescriptions[id].label,
+  scene: presetSceneDescriptions[id].scene,
+}));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,7 +44,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { faceFile, facePreview, background, setFace, setBackground } = useSwapStore();
+  const {
+    faceFile,
+    facePreview,
+    backgroundEnabled,
+    selectedSceneId,
+    uploadedScenes,
+    setFace,
+    setBackgroundEnabled,
+    selectScene,
+    addUploadedScene,
+  } = useSwapStore();
   const [session, setSession] = useState<LiveSwapSession | null>(null);
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState<string | null>(null);
@@ -46,19 +62,32 @@ function Index() {
   const [isLandscape, setIsLandscape] = useState(false);
   const remoteRef = useRef<HTMLVideoElement>(null);
 
+  const scenes = [...presetScenes, ...uploadedScenes];
+  const activeScene = backgroundEnabled
+    ? (scenes.find((s) => s.id === selectedSceneId) ?? null)
+    : null;
+
   useEffect(() => () => session?.stop(), [session]);
 
-  // Push new face/background to a running session automatically.
+  // Push new face/background to a running session automatically, with an AI-tailored prompt.
   useEffect(() => {
     if (!session || !faceFile) return;
-    updateLiveSwap(session, faceFile, backgroundImages[background], buildSwapPrompt(background)).catch((e: unknown) =>
-      setError(e instanceof Error ? e.message : "Could not update the swap"),
-    );
-  }, [session, faceFile, background]);
+    setStatus("updating");
+    getSwapPrompt(faceFile, activeScene)
+      .then((prompt) => updateLiveSwap(session, faceFile, activeScene?.src ?? null, prompt))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not update the swap"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, faceFile, activeScene?.id]);
 
   const onUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setFace(file);
+  };
+
+  const onSceneUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) addUploadedScene(file);
+    e.target.value = "";
   };
 
   const start = async () => {
@@ -66,11 +95,12 @@ function Index() {
     setError(null);
     setStarting(true);
     try {
+      setStatus("writing prompt");
+      const prompt = await getSwapPrompt(faceFile, activeScene);
       const s = await startLiveSwap({
         face: faceFile,
-        backgroundUrl: backgroundImages[background],
-        prompt: buildSwapPrompt(background),
-        onLocalStream: () => undefined,
+        backgroundUrl: activeScene?.src ?? null,
+        prompt,
         onRemoteStream: (stream) => {
           if (remoteRef.current) remoteRef.current.srcObject = stream;
         },
@@ -129,30 +159,48 @@ function Index() {
             </section>
 
             <section>
-              <h2 className="step-label">2. Background</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {backgroundIds.map((id) => (
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="step-label mb-0">2. Background</h2>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={backgroundEnabled}
+                  aria-label="Swap background"
+                  onClick={() => setBackgroundEnabled(!backgroundEnabled)}
+                  className="toggle"
+                >
+                  <span className="toggle-thumb" />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3" data-disabled={!backgroundEnabled}>
+                {scenes.map((scene) => (
                   <button
-                    key={id}
+                    key={scene.id}
                     type="button"
-                    onClick={() => setBackground(id)}
-                    data-active={background === id}
+                    onClick={() => selectScene(scene.id)}
+                    data-active={backgroundEnabled && selectedSceneId === scene.id}
                     className="scene-tile"
                   >
                     <img
-                      src={backgroundImages[id]}
-                      alt={backgroundDescriptions[id].label}
+                      src={scene.src}
+                      alt={scene.label}
                       loading="lazy"
                       width={1280}
                       height={720}
                       className="aspect-[3/2] w-full object-cover"
                     />
-                    <span className="block px-3 py-2 text-left text-sm font-medium">
-                      {backgroundDescriptions[id].label}
-                    </span>
+                    <span className="block px-3 py-2 text-left text-sm font-medium">{scene.label}</span>
                   </button>
                 ))}
+                <label className="scene-tile flex cursor-pointer flex-col items-center justify-center gap-1 py-6 text-center hover:border-primary">
+                  <span className="text-2xl text-muted-foreground">+</span>
+                  <span className="text-sm font-medium">Upload a background</span>
+                  <input type="file" accept="image/*" className="sr-only" onChange={onSceneUpload} />
+                </label>
               </div>
+              {!backgroundEnabled && (
+                <p className="mt-2 text-sm text-muted-foreground">Background swap is off. Your real background is kept.</p>
+              )}
             </section>
 
             <section>
@@ -168,7 +216,7 @@ function Index() {
                   disabled={!faceFile || starting}
                   className="btn-primary w-full"
                 >
-                  {starting ? "Connecting…" : "Start live swap"}
+                  {starting ? "Getting ready…" : "Start live swap"}
                 </button>
               )}
               {!faceFile && (
