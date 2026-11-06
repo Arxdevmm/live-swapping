@@ -42,7 +42,6 @@ function Index() {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
-  const localRef = useRef<HTMLVideoElement>(null);
   const remoteRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => () => session?.stop(), [session]);
@@ -68,9 +67,7 @@ function Index() {
       const s = await startLiveSwap({
         face: faceFile,
         prompt: buildSwapPrompt(background),
-        onLocalStream: (stream) => {
-          if (localRef.current) localRef.current.srcObject = stream;
-        },
+        onLocalStream: () => undefined,
         onRemoteStream: (stream) => {
           if (remoteRef.current) remoteRef.current.srcObject = stream;
         },
@@ -90,13 +87,12 @@ function Index() {
     setSession(null);
     setStatus("idle");
     if (remoteRef.current) remoteRef.current.srcObject = null;
-    if (localRef.current) localRef.current.srcObject = null;
   };
 
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-5 py-10 md:py-14">
-        <header className="mb-10">
+        <header className="mb-10" hidden={!!session}>
           <p className="font-display text-sm uppercase tracking-[0.3em] text-primary">SwapCam</p>
           <h1 className="mt-3 font-display text-4xl font-bold leading-tight md:text-6xl">
             Be someone else, <span className="text-gradient">somewhere else.</span>
@@ -107,8 +103,8 @@ function Index() {
           </p>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
-          <aside className="space-y-8">
+        <div className={session ? "relative" : "grid gap-8 lg:grid-cols-[360px_1fr]"}>
+          <aside className="space-y-8" hidden={!!session}>
             <section>
               <h2 className="step-label">1. Face photo</h2>
               <label className="panel flex cursor-pointer items-center gap-4 p-4 transition hover:border-primary">
@@ -182,6 +178,11 @@ function Index() {
           <section className="space-y-4">
             <div className="panel relative aspect-video overflow-hidden">
               <video ref={remoteRef} autoPlay playsInline muted className="size-full object-cover" />
+              {session && (
+                <button type="button" onClick={stop} className="btn-secondary absolute bottom-3 right-3">
+                  Stop live swap
+                </button>
+              )}
               {!session && (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
                   Your swapped video will appear here
@@ -190,18 +191,7 @@ function Index() {
               <span className="status-pill absolute left-3 top-3" data-live={status === "generating"}>
                 {status}
               </span>
-              <video
-                ref={localRef}
-                autoPlay
-                playsInline
-                muted
-                className="absolute bottom-3 right-3 w-28 rounded-md border border-border md:w-40"
-              />
             </div>
-            <details className="panel p-4 text-sm">
-              <summary className="cursor-pointer font-medium">Auto-configured prompt</summary>
-              <p className="mt-2 text-muted-foreground">{buildSwapPrompt(background)}</p>
-            </details>
           </section>
         </div>
       </div>
