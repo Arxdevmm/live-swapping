@@ -1,6 +1,12 @@
-export type BackgroundId = "living-room" | "office" | "backyard" | "beach";
+export type SceneOption = {
+  id: string;
+  label: string;
+  src: string;
+  // Written description for preset scenes; uploaded scenes have none.
+  scene?: string;
+};
 
-export const backgroundDescriptions: Record<BackgroundId, { label: string; scene: string }> = {
+export const presetSceneDescriptions: Record<string, { label: string; scene: string }> = {
   "living-room": {
     label: "Living room",
     scene: "a real lived-in living room with a grey sofa, bookshelf, rug and daylight from a window",
@@ -19,14 +25,20 @@ export const backgroundDescriptions: Record<BackgroundId, { label: string; scene
   },
 };
 
-// Auto-configured prompt sent to Decart together with the combined face + scene reference image.
-export function buildSwapPrompt(background: BackgroundId): string {
-  const { scene } = backgroundDescriptions[background];
-  return (
-    "The reference image has two parts: a face photo on the left and a full background scene on the right, both in portrait format. The output is a vertical portrait video. " +
-    "Replace the person's face with the face from the left side of the reference image, matching identity, " +
-    "skin tone and features precisely while keeping their expressions and head movement. Replace the entire " +
-    `background, edge to edge, with the full scene from the right side of the reference image: ${scene}. ` +
-    "Keep sharp detail, natural lighting matched to the scene and clean edges around hair and shoulders. The result must look like a realistic photo. Keep the person's body, clothing and pose unchanged."
-  );
+export type PromptInput = {
+  backgroundEnabled: boolean;
+  scene?: string;
+};
+
+// Fallback prompt used when the AI prompt writer is unavailable.
+// The background itself is replaced on-device before the video reaches Decart,
+// so the prompt only asks Decart to swap the face and keep the scene intact.
+export function buildSwapPrompt({ backgroundEnabled, scene }: PromptInput): string {
+  const face =
+    "Replace the person's face with the face from the reference image, matching identity, skin tone " +
+    "and features precisely while keeping their expressions and head movement natural.";
+  const background = backgroundEnabled
+    ? ` Keep the background exactly as it is${scene ? `: ${scene}` : ""}, and match the lighting on the person to it.`
+    : " Keep the original background unchanged.";
+  return `${face}${background} The result must look like a realistic, sharp photo. Keep the body, clothing and pose unchanged.`;
 }
