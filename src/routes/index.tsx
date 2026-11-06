@@ -140,8 +140,8 @@ function Index() {
                       src={backgroundImages[id]}
                       alt={backgroundDescriptions[id].label}
                       loading="lazy"
-                      width={992}
-                      height={672}
+                      width={1280}
+                      height={720}
                       className="aspect-[3/2] w-full object-cover"
                     />
                     <span className="block px-3 py-2 text-left text-sm font-medium">

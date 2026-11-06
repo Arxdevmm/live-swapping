@@ -6,7 +6,7 @@ describe("buildSwapPrompt", () => {
     expect(buildSwapPrompt("office")).toContain("face from the reference image");
   });
   it("uses the selected background scene", () => {
-    expect(buildSwapPrompt("backyard")).toContain("sunny backyard garden");
+    expect(buildSwapPrompt("backyard")).toContain("home backyard with a green lawn");
     expect(buildSwapPrompt("backyard")).not.toContain("office");
   });
 });
