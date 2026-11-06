@@ -23,7 +23,7 @@ export const backgroundDescriptions: Record<BackgroundId, { label: string; scene
 export function buildSwapPrompt(background: BackgroundId): string {
   const { scene } = backgroundDescriptions[background];
   return (
-    "The reference image has two parts: a face photo on the left and a full background scene on the right. " +
+    "The reference image has two parts: a face photo on the left and a full background scene on the right, both in portrait format. The output is a vertical portrait video. " +
     "Replace the person's face with the face from the left side of the reference image, matching identity, " +
     "skin tone and features precisely while keeping their expressions and head movement. Replace the entire " +
     `background, edge to edge, with the full scene from the right side of the reference image: ${scene}. ` +
