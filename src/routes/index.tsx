@@ -42,6 +42,7 @@ function Index() {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
   const remoteRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => () => session?.stop(), [session]);
@@ -177,8 +178,18 @@ function Index() {
           </aside>
 
           <section className="space-y-4">
-            <div className="panel relative mx-auto aspect-[9/16] w-full max-w-md overflow-hidden">
-              <video ref={remoteRef} autoPlay playsInline muted className="size-full object-cover" />
+            <div className={`panel relative mx-auto w-full overflow-hidden ${isLandscape ? "aspect-video max-w-4xl" : "aspect-[9/16] max-w-md"}`}>
+              <video
+                ref={remoteRef}
+                autoPlay
+                playsInline
+                muted
+                onLoadedMetadata={(e) =>
+                  setIsLandscape(e.currentTarget.videoWidth > e.currentTarget.videoHeight)
+                }
+                onResize={(e) => setIsLandscape(e.currentTarget.videoWidth > e.currentTarget.videoHeight)}
+                className="size-full bg-background object-contain"
+              />
               {session && (
                 <button type="button" onClick={stop} className="btn-secondary absolute bottom-3 right-3">
                   Stop live swap
