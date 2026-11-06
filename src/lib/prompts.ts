@@ -3,19 +3,19 @@ export type BackgroundId = "living-room" | "office" | "backyard" | "beach";
 export const backgroundDescriptions: Record<BackgroundId, { label: string; scene: string }> = {
   "living-room": {
     label: "Living room",
-    scene: "a cozy modern living room with a sofa, plants and warm lamp light",
+    scene: "a real lived-in living room with a grey sofa, bookshelf, rug and daylight from a window",
   },
   office: {
     label: "Office",
-    scene: "a bright modern office with desks, glass walls and a city view window",
+    scene: "a real open-plan office with desks, monitors, office chairs and ceiling lights",
   },
   backyard: {
     label: "Backyard",
-    scene: "a sunny backyard garden with a green lawn, wooden fence and trees",
+    scene: "a real home backyard with a green lawn, wooden fence, trees and patio chairs",
   },
   beach: {
     label: "Beach",
-    scene: "a tropical beach at golden hour with palm trees and a calm ocean",
+    scene: "a real sandy beach in daytime with gentle waves, palm trees and a clear sky",
   },
 };
 
@@ -25,6 +25,6 @@ export function buildSwapPrompt(background: BackgroundId): string {
   return (
     "Replace the person's face with the face from the reference image, keeping their " +
     "expressions, head movement and lighting natural. Replace the entire background with " +
-    `${scene}. Keep the person's body, clothing and pose unchanged.`
+    `${scene}. The result must look like a realistic photo. Keep the person's body, clothing and pose unchanged.`
   );
 }
