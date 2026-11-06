@@ -87,7 +87,7 @@ export async function createBackgroundCompositor(
         if (mask.width !== confidence.width) mask.width = confidence.width;
         if (mask.height !== confidence.height) mask.height = confidence.height;
         const data = maskCtx.createImageData(confidence.width, confidence.height);
-        for (let i = 0; i < values.length; i++) data.data[i * 4 + 3] = Math.round(values[i] * 255);
+        for (let i = 0; i < values.length; i++) data.data[i * 4 + 3] = Math.round((values[i] ?? 0) * 255);
         maskCtx.putImageData(data, 0, 0);
         personCtx.globalCompositeOperation = "copy";
         personCtx.drawImage(video, 0, 0, width, height);

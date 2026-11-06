@@ -3,7 +3,7 @@ export type SceneOption = {
   label: string;
   src: string;
   // Written description for preset scenes; uploaded scenes have none.
-  scene?: string;
+  scene?: string | undefined;
 };
 
 export const presetSceneDescriptions: Record<string, { label: string; scene: string }> = {
@@ -27,7 +27,7 @@ export const presetSceneDescriptions: Record<string, { label: string; scene: str
 
 export type PromptInput = {
   backgroundEnabled: boolean;
-  scene?: string;
+  scene?: string | undefined;
 };
 
 // Fallback prompt used when the AI prompt writer is unavailable.

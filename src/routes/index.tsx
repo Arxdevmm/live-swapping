@@ -19,8 +19,8 @@ const presetImages: Record<string, string> = {
 const presetScenes: SceneOption[] = Object.entries(presetImages).map(([id, src]) => ({
   id,
   src,
-  label: presetSceneDescriptions[id].label,
-  scene: presetSceneDescriptions[id].scene,
+  label: presetSceneDescriptions[id]?.label ?? id,
+  scene: presetSceneDescriptions[id]?.scene ?? "",
 }));
 
 export const Route = createFileRoute("/")({

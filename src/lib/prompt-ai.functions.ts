@@ -39,11 +39,25 @@ export const generateSwapPrompt = createServerFn({ method: "POST" })
       instructions,
       input: [{ role: "user", content }],
     });
-    const text = response.output
-      .flatMap((item) => ("content" in item && Array.isArray(item.content) ? item.content : []))
-      .map((part) => ("text" in part && typeof part.text === "string" ? part.text : ""))
-      .join("")
-      .trim();
+    const text = extractText(response.output);
     if (!text) throw new Error("The AI returned an empty prompt");
     return { prompt: text };
   });
+
+// Collects all text parts from a Responses output list without assuming its exact shape.
+function extractText(output: unknown): string {
+  if (!Array.isArray(output)) return "";
+  const parts: string[] = [];
+  for (const item of output as unknown[]) {
+    if (typeof item !== "object" || item === null || !("content" in item)) continue;
+    const content = (item as { content: unknown }).content;
+    if (!Array.isArray(content)) continue;
+    for (const part of content as unknown[]) {
+      if (typeof part === "object" && part !== null && "type" in part && "text" in part) {
+        const { type, text } = part as { type: unknown; text: unknown };
+        if (type === "output_text" && typeof text === "string") parts.push(text);
+      }
+    }
+  }
+  return parts.join("").trim();
+}
