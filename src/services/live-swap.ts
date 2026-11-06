@@ -1,5 +1,6 @@
 import type { RealTimeClient } from "@decartai/sdk";
 import { createRealtimeToken } from "@/lib/decart.functions";
+import { buildReferenceImage } from "@/services/reference-image";
 
 export type LiveSwapSession = {
   client: RealTimeClient;
@@ -9,6 +10,7 @@ export type LiveSwapSession = {
 
 type StartOptions = {
   face: File;
+  backgroundUrl: string;
   prompt: string;
   onLocalStream: (stream: MediaStream) => void;
   onRemoteStream: (stream: MediaStream) => void;
@@ -17,14 +19,15 @@ type StartOptions = {
 
 export async function startLiveSwap(options: StartOptions): Promise<LiveSwapSession> {
   const { createDecartClient, models } = await import("@decartai/sdk");
-  const model = models.realtime("lucy-latest");
+  const model = models.realtime("lucy-2.6");
 
   const camera = await navigator.mediaDevices.getUserMedia({
     audio: false,
-    video: { frameRate: model.fps, width: model.width, height: model.height },
+    video: { frameRate: model.fps, width: { ideal: 1920 }, height: { ideal: 1080 } },
   });
   options.onLocalStream(camera);
 
+  const reference = await buildReferenceImage(options.face, options.backgroundUrl);
   const decart = createDecartClient({
     apiKeyProvider: async () => (await createRealtimeToken()).apiKey,
   });
@@ -32,11 +35,12 @@ export async function startLiveSwap(options: StartOptions): Promise<LiveSwapSess
   const client = await decart.realtime.connect(camera, {
     model,
     mirror: "auto",
+    resolution: "1080p",
     onRemoteStream: options.onRemoteStream,
     onConnectionChange: (state) => options.onStatus(state),
     onCapacityWait: ({ retryAfterMs }) =>
       options.onStatus(`busy, retrying in ${Math.round(retryAfterMs / 1000)} s`),
-    initialState: { prompt: { text: options.prompt, enhance: true }, image: options.face },
+    initialState: { prompt: { text: options.prompt, enhance: true }, image: reference },
   });
 
   return {
@@ -49,6 +53,12 @@ export async function startLiveSwap(options: StartOptions): Promise<LiveSwapSess
   };
 }
 
-export async function updateLiveSwap(session: LiveSwapSession, face: File, prompt: string) {
-  await session.client.set({ prompt, image: face, enhance: true });
+export async function updateLiveSwap(
+  session: LiveSwapSession,
+  face: File,
+  backgroundUrl: string,
+  prompt: string,
+) {
+  const image = await buildReferenceImage(face, backgroundUrl);
+  await session.client.set({ prompt, image, enhance: true });
 }
