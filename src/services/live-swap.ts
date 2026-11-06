@@ -23,7 +23,7 @@ export async function startLiveSwap(options: StartOptions): Promise<LiveSwapSess
 
   const camera = await navigator.mediaDevices.getUserMedia({
     audio: false,
-    video: { frameRate: model.fps, width: { ideal: 1080 }, height: { ideal: 1920 }, aspectRatio: { ideal: 9 / 16 } },
+    video: { frameRate: model.fps, facingMode: "user", height: { ideal: 1280 } },
   });
   options.onLocalStream(camera);
 
