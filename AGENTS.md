@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Decart live sessions use short-lived client tokens minted by a server function (src/lib/decart.functions.ts); the permanent key never reaches the browser.
