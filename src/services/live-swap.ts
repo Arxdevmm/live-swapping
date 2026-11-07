@@ -1,6 +1,9 @@
 import type { RealTimeClient } from "@decartai/sdk";
 import { createRealtimeToken } from "@/lib/decart.functions";
-import { createBackgroundCompositor, type BackgroundCompositor } from "@/services/background-compositor";
+import {
+  createBackgroundCompositor,
+  type BackgroundCompositor,
+} from "@/services/background-compositor";
 
 export type LiveSwapSession = {
   client: RealTimeClient;
@@ -23,26 +26,42 @@ export async function startLiveSwap(options: StartOptions): Promise<LiveSwapSess
   options.onStatus("starting camera");
   const camera = await navigator.mediaDevices.getUserMedia({
     audio: false,
-    video: { frameRate: model.fps, facingMode: "user", height: { ideal: 1280 } },
+    video: {
+      frameRate: model.fps,
+      facingMode: "user",
+      width: { ideal: model.width },
+      height: { ideal: model.height },
+    },
   });
 
   options.onStatus("preparing background");
-  const compositor = await createBackgroundCompositor(camera, options.backgroundUrl);
+  const compositor = await createBackgroundCompositor(camera, options.backgroundUrl).catch(
+    (error: unknown) => {
+      camera.getTracks().forEach((track) => track.stop());
+      throw error;
+    },
+  );
 
   const decart = createDecartClient({
     apiKeyProvider: async () => (await createRealtimeToken()).apiKey,
   });
 
-  const client = await decart.realtime.connect(compositor.stream, {
-    model,
-    mirror: "auto",
-    resolution: "1080p",
-    onRemoteStream: options.onRemoteStream,
-    onConnectionChange: (state) => options.onStatus(state),
-    onCapacityWait: ({ retryAfterMs }) =>
-      options.onStatus(`busy, retrying in ${Math.round(retryAfterMs / 1000)} s`),
-    initialState: { prompt: { text: options.prompt, enhance: true }, image: options.face },
-  });
+  const client = await decart.realtime
+    .connect(compositor.stream, {
+      model,
+      mirror: "auto",
+      resolution: "1080p",
+      onRemoteStream: options.onRemoteStream,
+      onConnectionChange: (state) => options.onStatus(state),
+      onCapacityWait: ({ retryAfterMs }) =>
+        options.onStatus(`busy, retrying in ${Math.round(retryAfterMs / 1000)} s`),
+      initialState: { prompt: { text: options.prompt, enhance: true }, image: options.face },
+    })
+    .catch((error: unknown) => {
+      compositor.stop();
+      camera.getTracks().forEach((track) => track.stop());
+      throw error;
+    });
 
   return {
     client,

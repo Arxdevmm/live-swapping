@@ -32,3 +32,4 @@ use the editor.
 - Decart live sessions use short-lived client tokens minted by a server function (src/lib/decart.functions.ts); the permanent key never reaches the browser.
 - Background swap is done on-device (MediaPipe segmentation in src/services/background-compositor.ts) before frames reach Decart; Decart only gets the face as its single reference image.
 - Decart prompts are written per selection by the AI Gateway (src/lib/prompt-ai.functions.ts) with buildSwapPrompt as fallback.
+- Realtime capture requests the selected model's ideal dimensions without enforcing an exact camera size; retain Lucy 2.6 at 1080p for quality and release camera/compositor resources when connection setup fails.
