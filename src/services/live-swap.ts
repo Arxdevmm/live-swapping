@@ -1,6 +1,9 @@
 import type { RealTimeClient } from "@decartai/sdk";
 import { createRealtimeToken } from "@/lib/decart.functions";
-import { createBackgroundCompositor, type BackgroundCompositor } from "@/services/background-compositor";
+import {
+  createBackgroundCompositor,
+  type BackgroundCompositor,
+} from "@/services/background-compositor";
 
 export type LiveSwapSession = {
   client: RealTimeClient;
@@ -43,20 +46,22 @@ export async function startLiveSwap(options: StartOptions): Promise<LiveSwapSess
     apiKeyProvider: async () => (await createRealtimeToken()).apiKey,
   });
 
-  const client = await decart.realtime.connect(compositor.stream, {
-    model,
-    mirror: "auto",
-    resolution: "1080p",
-    onRemoteStream: options.onRemoteStream,
-    onConnectionChange: (state) => options.onStatus(state),
-    onCapacityWait: ({ retryAfterMs }) =>
-      options.onStatus(`busy, retrying in ${Math.round(retryAfterMs / 1000)} s`),
-    initialState: { prompt: { text: options.prompt, enhance: true }, image: options.face },
-  }).catch((error: unknown) => {
-    compositor.stop();
-    camera.getTracks().forEach((track) => track.stop());
-    throw error;
-  });
+  const client = await decart.realtime
+    .connect(compositor.stream, {
+      model,
+      mirror: "auto",
+      resolution: "1080p",
+      onRemoteStream: options.onRemoteStream,
+      onConnectionChange: (state) => options.onStatus(state),
+      onCapacityWait: ({ retryAfterMs }) =>
+        options.onStatus(`busy, retrying in ${Math.round(retryAfterMs / 1000)} s`),
+      initialState: { prompt: { text: options.prompt, enhance: true }, image: options.face },
+    })
+    .catch((error: unknown) => {
+      compositor.stop();
+      camera.getTracks().forEach((track) => track.stop());
+      throw error;
+    });
 
   return {
     client,

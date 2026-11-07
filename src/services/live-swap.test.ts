@@ -75,7 +75,9 @@ describe("live swap SDK integration", () => {
     await updateLiveSwap(session, face, null, "Updated face swap");
     expect(mocks.setBackground).toHaveBeenCalledWith(null);
     expect(mocks.set).toHaveBeenCalledWith({
-      prompt: "Updated face swap", image: face, enhance: true,
+      prompt: "Updated face swap",
+      image: face,
+      enhance: true,
     });
     session.stop();
     expect(mocks.disconnect).toHaveBeenCalledOnce();
