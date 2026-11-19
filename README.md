@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Live Swapping
+
+Could you please build a site that will perform face and backgroud swapping by Decart API after user uploaded the source images. We will set up the prompts as auto configured and clicking start live swap will send the prompts to decart.
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://live-swapping.xn--artsys-dva.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/74f406a1-3343-4916-9903-c8650405fff0).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
